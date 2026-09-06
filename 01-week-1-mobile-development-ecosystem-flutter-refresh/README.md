@@ -15,15 +15,17 @@ NIM: 244107020023
 
 ## Screenshots
 ### Flutter Doctor Before
-![Flutter Doctor](screenshots/issue.png)
+<img src="screenshot/issue.png" width="350">
 ### Flutter Doctor After
-![Flutter Doctor](screenshots/flutter_doctor.png)
+![Flutter Doctor](screenshot/flutter_doctor.png)
+<img src="screenshot/flutter_doctor.png" width="350">
 ### Flutter Devices
-![Flutter Devices](screenshots/devices.png)
+![Flutter Devices](screenshot/devices.png)
+<img src="screenshots/devices.png" width="350">
 ### Practical Lab Result
-![Flutter Profile](screenshots/practical_lab.png)
+<img src="screenshot/practical_lab.png" width="350">
 ### Mini Assignment Result
-![Flutter Profile Mini Assignment](screenshots/result.png)
+<img src="screenshot/result.png" width="350">
 
 ## Hot Reload vs Hot Restart
 - **Hot reload:** Injects updated code into the running Dart VM directly without losing the current app state.
