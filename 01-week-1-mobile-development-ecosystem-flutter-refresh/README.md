@@ -17,11 +17,9 @@ NIM: 244107020023
 ### Flutter Doctor Before
 <img src="screenshot/issue.png" width="350">
 ### Flutter Doctor After
-![Flutter Doctor](screenshot/flutter_doctor.png)
 <img src="screenshot/flutter_doctor.png" width="350">
 ### Flutter Devices
-![Flutter Devices](screenshot/devices.png)
-<img src="screenshots/devices.png" width="350">
+<img src="screenshot/devices.png" width="350">
 ### Practical Lab Result
 <img src="screenshot/practical_lab.png" width="350">
 ### Mini Assignment Result
