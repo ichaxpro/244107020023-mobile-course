@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
 class ProductPage extends ConsumerWidget {
   const ProductPage({super.key});
 
@@ -19,6 +18,10 @@ class ProductPage extends ConsumerWidget {
             children: [
               Text('Gagal memuat: $err'),
               FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () => ref.invalidate(productsProvider),
                 child: const Text('Coba lagi'),
               ),
@@ -53,6 +56,6 @@ class ProductsNotifier extends AsyncNotifier<List<String>> {
   }
 }
 
-final productsProvider =
-    AsyncNotifierProvider<ProductsNotifier, List<String>>(
-        ProductsNotifier.new);
+final productsProvider = AsyncNotifierProvider<ProductsNotifier, List<String>>(
+  ProductsNotifier.new,
+);

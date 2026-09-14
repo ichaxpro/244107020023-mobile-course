@@ -1,30 +1,59 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:week3_todo/pages/stats_page.dart';
+import 'package:week3_todo/providers/stats_provider.dart';
 import 'package:week3_todo/main.dart';
 
+class FixedRandom implements Random {
+  FixedRandom(this.value);
+
+  final double value;
+
+  @override
+  bool nextBool() => value >= 0.5;
+
+  @override
+  double nextDouble() => value;
+
+  @override
+  int nextInt(int max) => (value * max).floor();
+}
+
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('menambah tugas baru', (tester) async {
+    await tester.pumpWidget(const ProviderScope(child: MyApp()));
+    expect(find.text('Belum ada tugas'), findsOneWidget);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
     await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'Kerjakan PR minggu 3');
+    await tester.tap(find.text('Tambah'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kerjakan PR minggu 3'), findsOneWidget);
+  });
+
+  testWidgets('menampilkan statistik setelah pengambilan data berhasil', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          statsProvider.overrideWith(
+            () => StatsNotifier(random: FixedRandom(0.5), delay: Duration.zero),
+          ),
+        ],
+        child: const MaterialApp(home: StatsPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Total tugas: 0'), findsOneWidget);
+    expect(find.text('Tugas selesai: 0'), findsOneWidget);
+    expect(find.text('Belum selesai: 0'), findsOneWidget);
   });
 }

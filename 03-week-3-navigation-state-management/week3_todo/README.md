@@ -1,17 +1,18 @@
-# week3_todo
+# Week 3: Navigation & State Management
 
-A new Flutter project.
+**Name:** Dewi Chalissa Rania  
+**Class:** TI 3I  
+**NIM:** 244107020023  
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📋 Checklist
 
-A few resources to get you started if this is your first Flutter project:
+- [x] `Navigasi GoRouter bekerja: pindah halaman, back, dan akses path detail langsung.
+- [x] ProviderScope membungkus root aplikasi; state ToDo bertahan saat berpindah halaman.
+- [x] UI AsyncValue menangani loading, error, dan success, bukan hanya success.
+- [x] flutter analyze tanpa issue dan semua test lulus.
+- [x] Hasil AI diverifikasi dan didokumentasikan pada folder docs/.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
