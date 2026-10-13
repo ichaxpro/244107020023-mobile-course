@@ -108,3 +108,38 @@ All three app lifecycle states were tested with the payload `{"route": "/announc
   1. **Android 13+ Permission & Desugaring**: Initial AI boilerplate omitted `POST_NOTIFICATIONS` in `AndroidManifest.xml` and `isCoreLibraryDesugaringEnabled` in Gradle. Without these, builds fail or notifications are blocked silently on Android 13+.
   2. **GoRouter Guard Blocking Deep Links**: Initial AI draft route guards redirected unauthenticated deep link navigation to `/login`. Fixed the guard redirect logic to allow public announcement routes (`/announcement/:id`).
   3. **Foreground Banner Callbacks**: Fixed `InitializationSettings` parameter syntax for `flutter_local_notifications` and bound tap callbacks (`_onRouteTap`) so local notification clicks trigger `router.go(route)`.
+
+## Audit Arsitektur - Praktikum 1
+
+### 1. Pemetaan File ke Layer
+| File | Layer saat ini | Masalah |
+| :--- | :--- | :--- |
+| `lib/pages/*` | Presentation | Bebas dari panggilan API langsung dan format data |
+| `lib/providers/auth_provider.dart` | Presentation (State) | Instansiasi manual `AuthRepository()` langsung tanpa injeksi dependency |
+| `lib/data/auth_repository.dart` | Data | Kontrak (interface) dan implementasi masih tergabung dalam satu kelas konkret |
+
+### 2. Temuan Tiga Pelanggaran Klasik
+- **Akses Jaringan/DB di Widget:** 0 temuan
+- **Logika Bisnis di build():** 0 temuan
+- **Instansiasi Manual (DI Bocor):** 
+  - `lib/providers/auth_provider.dart:6` -> `final authRepositoryProvider = Provider<AuthRepository>((ref) => AuthRepository());`
+
+### 3. Struktur Target (Clean Architecture)
+```text
+lib/
+├── core/
+│   ├── failures.dart
+│   └── providers.dart
+├── features/
+│   └── auth/ (atau notifications/)
+│       ├── domain/
+│       │   ├── entities/
+│       │   ├── repositories/auth_repository.dart       # Interface/Abstract class
+│       │   └── usecases/
+│       ├── data/
+│       │   ├── models/
+│       │   └── repositories/auth_repository_impl.dart  # Implementasi konkret
+│       └── presentation/
+│           ├── providers/auth_providers.dart
+│           └── pages/
+└── routes.dart
