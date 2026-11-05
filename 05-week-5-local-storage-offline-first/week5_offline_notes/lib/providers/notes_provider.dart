@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/repositories/note_repository.dart';
 import '../data/local/note.dart';
 import '../data/prefs.dart';
+import '../domain/search_notes_use_case.dart';
 
 final noteRepositoryProvider = Provider<NoteRepository>(
   (ref) => NoteRepository(),
@@ -71,3 +72,34 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     return synced;
   }
 }
+
+/// Provider instance use case pencarian murni di layer Domain
+final searchNotesUseCaseProvider = Provider<SearchNotesUseCase>((ref) {
+  return const SearchNotesUseCase();
+});
+
+/// Notifier untuk mengelola teks query pencarian
+final searchQueryProvider =
+    NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
+
+class SearchQueryNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void setQuery(String query) {
+    state = query;
+  }
+
+  void clear() {
+    state = '';
+  }
+}
+
+/// Provider reaktif yang mengembalikan daftar catatan yang telah difilter sesuai query
+final filteredNotesProvider = Provider<AsyncValue<List<Note>>>((ref) {
+  final notesAsync = ref.watch(notesProvider);
+  final query = ref.watch(searchQueryProvider);
+  final useCase = ref.watch(searchNotesUseCaseProvider);
+
+  return notesAsync.whenData((notes) => useCase.execute(notes, query));
+});

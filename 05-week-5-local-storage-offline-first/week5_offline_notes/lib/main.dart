@@ -29,9 +29,10 @@ class NotesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final notes = ref.watch(notesProvider);
+    final filteredNotes = ref.watch(filteredNotesProvider);
     final dirtyCount = ref.watch(dirtyNotesCountProvider);
     final forceOffline = ref.watch(forceOfflineProvider);
+    final currentQuery = ref.watch(searchQueryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -57,14 +58,76 @@ class NotesPage extends ConsumerWidget {
               error: (error, _) => Text('Gagal membaca status sync: $error'),
             ),
             const SizedBox(height: 16),
-            notes.when(
-              data: (items) => _NotesList(notes: items),
+            const _SearchInput(),
+            const SizedBox(height: 16),
+            filteredNotes.when(
+              data: (items) => _NotesList(
+                notes: items,
+                query: currentQuery,
+              ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Text('Gagal memuat catatan: $error'),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SearchInput extends ConsumerStatefulWidget {
+  const _SearchInput();
+
+  @override
+  ConsumerState<_SearchInput> createState() => _SearchInputState();
+}
+
+class _SearchInputState extends ConsumerState<_SearchInput> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: ref.read(searchQueryProvider));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final query = ref.watch(searchQueryProvider);
+    if (_controller.text != query) {
+      _controller.text = query;
+    }
+
+    return TextField(
+      controller: _controller,
+      decoration: InputDecoration(
+        hintText: 'Cari judul catatan...',
+        prefixIcon: const Icon(Icons.search),
+        suffixIcon: query.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  _controller.clear();
+                  ref.read(searchQueryProvider.notifier).clear();
+                },
+              )
+            : null,
+        filled: true,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      onChanged: (value) {
+        ref.read(searchQueryProvider.notifier).setQuery(value);
+      },
     );
   }
 }
@@ -153,40 +216,72 @@ class _DirtyBadge extends StatelessWidget {
 }
 
 class _NotesList extends StatelessWidget {
-  const _NotesList({required this.notes});
+  const _NotesList({required this.notes, required this.query});
 
   final List<Note> notes;
+  final String query;
 
   @override
   Widget build(BuildContext context) {
     if (notes.isEmpty) {
+      if (query.isNotEmpty) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 40, bottom: 20),
+          child: Center(
+            child: Column(
+              children: [
+                const Icon(Icons.search_off, size: 48, color: Colors.grey),
+                const SizedBox(height: 8),
+                Text(
+                  'Tidak ada catatan dengan judul "$query"',
+                  style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
       return const Padding(
         padding: EdgeInsets.only(top: 48),
         child: Center(child: Text('Belum ada catatan. Tekan + untuk menambah.')),
       );
     }
 
+    final headerText = query.isNotEmpty
+        ? 'Hasil pencarian (${notes.length})'
+        : 'Catatan tersimpan';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Catatan tersimpan', style: Theme.of(context).textTheme.titleMedium),
+        Text(headerText, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
-        ...notes.map(
-          (note) => Card(
-            child: ListTile(
-              leading: Icon(
-                note.dirty ? Icons.cloud_upload : Icons.cloud_done,
-                color: note.dirty ? Colors.orange : Colors.green,
-              ),
-              title: Text(note.title),
-              subtitle: Text(note.body.isEmpty ? 'Tanpa isi' : note.body),
-              trailing: note.dirty
-                  ? const Chip(label: Text('Dirty'))
-                  : const Chip(label: Text('Synced')),
-            ),
-          ),
-        ),
+        ...notes.map((note) => _NoteCard(note: note)),
       ],
+    );
+  }
+}
+
+class _NoteCard extends StatelessWidget {
+  const _NoteCard({required this.note});
+
+  final Note note;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: Icon(
+          note.dirty ? Icons.cloud_upload : Icons.cloud_done,
+          color: note.dirty ? Colors.orange : Colors.green,
+        ),
+        title: Text(note.title),
+        subtitle: Text(note.body.isEmpty ? 'Tanpa isi' : note.body),
+        trailing: note.dirty
+            ? const Chip(label: Text('Dirty'))
+            : const Chip(label: Text('Synced')),
+      ),
     );
   }
 }
